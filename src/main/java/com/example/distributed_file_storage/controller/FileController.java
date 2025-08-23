@@ -6,11 +6,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -76,7 +80,40 @@ public class FileController {
 
     //file list
     @GetMapping("/list")
-    public List<FileEntity> listFiles(){
+    public Page<FileEntity> listFiles(Pageable pageable){
+        return fileRepository.findAll(pageable);
+    }
+
+    //delete file
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteFile(@PathVariable Long id) throws IOException {
+        Optional<FileEntity> fileOptional = fileRepository.findById(id);
+
+        if(fileOptional.isPresent()){
+            FileEntity fileEntity = fileOptional.get();
+            File file = new File(fileEntity.getFilepath());
+
+            if(file.exists()){
+                file.delete();
+            }
+            
+            fileRepository.deleteById(id);
+
+            return ResponseEntity.ok("File deleted successfully");
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    //search file
+    @GetMapping("/search")
+    public List<FileEntity> searchFile(@RequestParam(required=false) String name, @RequestParam(required=false) String type) {
+        
+        if(name != null){
+            return fileRepository.findByfilenameContainingIgnoreCase(name);
+        }else if(type != null){
+            return fileRepository.findBymimeType(type);
+        }
         return fileRepository.findAll();
     }
 }
