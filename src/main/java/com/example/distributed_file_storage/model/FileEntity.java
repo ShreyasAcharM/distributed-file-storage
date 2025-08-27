@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -21,15 +23,20 @@ public class FileEntity {
     private String mimeType;
     private long size;
     private LocalDateTime uploadDate;
+    
+    @ManyToOne
+    @JoinColumn(name="user_id",nullable=false)
+    private User user;
 
     public FileEntity() {}
 
-    public FileEntity (String filename, String filepath, String mimeType, Long size) {
+    public FileEntity (String filename, String filepath, String mimeType, Long size, User user) {
         this.filename = filename;
         this.filepath = filepath;
         this.mimeType = mimeType;
         this.size = size;
         this.uploadDate = LocalDateTime.now();
+        this.user = user;
     }
 
     public Long getId() { return id; }
@@ -49,4 +56,7 @@ public class FileEntity {
 
     public LocalDateTime getUploadDate() { return uploadDate; }
     public void setUploadDate(LocalDateTime uploadDate) { this.uploadDate = uploadDate; }
+
+    public User getOwner(){ return user;}
+    public void setOwner(User user){this.user = user;}
 }

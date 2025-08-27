@@ -9,11 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.distributed_file_storage.model.FileEntity;
+import com.example.distributed_file_storage.model.User;
 import com.example.distributed_file_storage.repository.FileRepository;
+import com.example.distributed_file_storage.repository.UserRepository;
 
 @RestController
 @RequestMapping("/files")
@@ -34,10 +35,16 @@ public class FileController {
 
     @Autowired
     private FileRepository fileRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     //upload a file
     @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+    public String uploadFile(@RequestParam("file") MultipartFile file,Authentication authentication) throws IOException {
+
+        String username = authentication.getName();
+        User user = userRepository.findByusername(username).orElseThrow();
+
         File directory = new File(UPLOAD_DIR);
         if(!directory.exists()){
             directory.mkdirs();
@@ -45,12 +52,13 @@ public class FileController {
         java.nio.file.Path path = Paths.get(UPLOAD_DIR + file.getOriginalFilename());
         Files.write(path, file.getBytes());
 
-        FileEntity fileEntity = new FileEntity(
-            file.getOriginalFilename(),
-            path.toString(),
-            file.getContentType(),
-            file.getSize()
-        );
+        FileEntity fileEntity = new FileEntity();
+        fileEntity.setFilename(file.getOriginalFilename());
+        fileEntity.setSize(file.getSize());
+        fileEntity.setFilepath(path.toString());
+        fileEntity.setMimeType(file.getContentType());
+        fileEntity.setOwner(user);
+
         fileRepository.save(fileEntity);
 
         return "File uploaded ! - " + file.getOriginalFilename();
@@ -80,8 +88,9 @@ public class FileController {
 
     //file list
     @GetMapping("/list")
-    public Page<FileEntity> listFiles(Pageable pageable){
-        return fileRepository.findAll(pageable);
+    public List<FileEntity> listFiles(Authentication authentication){
+        User user = userRepository.findByusername(authentication.getName()).orElseThrow();
+        return fileRepository.findByuser(user);
     }
 
     //delete file
