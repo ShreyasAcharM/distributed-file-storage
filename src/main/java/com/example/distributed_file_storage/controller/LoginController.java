@@ -4,6 +4,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +15,7 @@ import com.example.distributed_file_storage.model.User;
 import com.example.distributed_file_storage.repository.UserRepository;
 
 @RestController
+@CrossOrigin(origins="http://localhost:5173")
 public class LoginController {
 
     private final PasswordEncoder passwordEncoder;
@@ -38,10 +40,10 @@ public class LoginController {
                 )
             );
             if(auth.isAuthenticated()){
-                return "login successful";
+                return "Login successful!!";
             }
         } catch (Exception e) {
-            return "invalid credentials";
+            return "Invalid credentials";
         }
         return "login failed";
     }

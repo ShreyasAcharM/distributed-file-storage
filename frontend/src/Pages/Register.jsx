@@ -1,0 +1,43 @@
+import axios from "axios";
+import { useState } from "react";
+
+export default function Register(){
+    const[username, setUsername] = useState("");
+    const[password,setPassword] = useState("");
+    const[message,setMessage] = useState("");
+
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        try{
+            const res = await axios.post("/dfs/register", {
+                username,
+                password
+            });
+            setMessage(res.data);
+        }catch(err){
+            setMessage(err.response?.data || "Registration failed");
+        }
+    };
+
+    return(
+    <div style={{ maxWidth: 400, margin: "50px auto" }}>
+      <h2>Register</h2>
+      <form onSubmit={handleRegister}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        /><br />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        /><br />
+        <button type="submit">Register</button>
+      </form>
+      <p>{message}</p>
+    </div>
+    )
+}
