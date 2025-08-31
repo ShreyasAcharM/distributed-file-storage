@@ -52,7 +52,7 @@ public class LoginController {
     public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest){
 
         if(userRepository.findByusername(registerRequest.getUsername()).isPresent()){
-            return ResponseEntity.badRequest().body("username exixts");
+            return ResponseEntity.badRequest().body("Username already exists!!");
         }
 
         User user = new User();

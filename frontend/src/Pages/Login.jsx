@@ -37,7 +37,7 @@ export default function login(){
                     onChange={(e) => setPassword(e.target.value)}
                     className="bg-white rounded-lg h-10 p-2"
                 /><br />
-                <button type="submit" className="bg-violet-600 p-4 rounded-3xl text-violet-100">- Go -</button>
+                <button type="submit" className="bg-violet-600 p-4 rounded-3xl text-violet-100 hover:bg-violet-200 hover:text-violet-600 transition-color duration-500 text-xl">- Go -</button>
             </form>
             <p className="text-violet-600 m-3 text-xl font-bold">{message}</p>
         </div>
